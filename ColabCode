@@ -1,0 +1,49 @@
+#scrape links from a page
+
+import requests
+from bs4 import BeautifulSoup
+import re
+
+url = "PLACE URL HERE"
+
+# Get the HTML
+html = requests.get(url).text
+
+# Parse the HTML
+soup = BeautifulSoup(html, "html.parser")
+
+# Extract all the links
+links = soup.find_all("a")
+
+# Print the links
+cleanList = []
+for link in links:
+  cleanedLink = link.get("href")
+  if "mp3" in cleanedLink:
+      cleanList.append(cleanedLink)
+distinctList = set(cleanList)
+distinctList = sorted(distinctList)
+print(len(distinctList))
+
+for link in sorted(distinctList):
+  print(link)
+
+
+#scrape file to drive
+
+from google.colab import drive
+drive.mount('/content/drive')
+
+for link in distinctList:
+  filename = link.split("/")[-1]
+  filename = filename.split("?")[0]
+  destinationFile = '/content/drive/MyDrive/Web Scrape Landing/' + filename
+  #print(destinationFile)
+  response = requests.get(link)
+
+  if response.status_code == 200:
+    with open(destinationFile, "wb") as f:
+      f.write(response.content)
+    print(f"Downloaded {filename}")
+  else:
+    print(f"Failed to download {url}")
